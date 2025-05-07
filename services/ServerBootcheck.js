@@ -16,7 +16,7 @@ const fs = require("fs");
 //     process.exit(1);
 // }
 
-const saKeyPath = path.resolve("../etc/secrets/serviceAccountKey.json");
+const saKeyPath = "/etc/secrets/serviceAccountKey.json";
 
 if (!fs.existsSync(saKeyPath)) {
     console.log(`\n[BOOTCHECK] - FAILED: Service Account Key missing: ${saKeyPath}\n`);
