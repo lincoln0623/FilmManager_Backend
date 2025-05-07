@@ -9,12 +9,12 @@ const fs = require("fs");
 //     process.exit(1);
 // }
 
-const envResult = dotenv.config({ path: envPath });
+// const envResult = dotenv.config({ path: envPath });
 
-if (envResult.error) {
-    console.log(`\n[BOOTCHECK] - FAILED: Couldn't load ${envPath}: ${envResult.error}\n`);
-    process.exit(1);
-}
+// if (envResult.error) {
+//     console.log(`\n[BOOTCHECK] - FAILED: Couldn't load ${envPath}: ${envResult.error}\n`);
+//     process.exit(1);
+// }
 
 const saKeyPath = path.resolve(__dirname, "../serviceAccountKey.json");
 
