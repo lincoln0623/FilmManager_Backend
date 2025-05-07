@@ -2,12 +2,12 @@ const path = require("path");
 const dotenv = require("dotenv");
 const fs = require("fs");
 
-const envPath = path.resolve(__dirname, "../.env");
+// const envPath = path.resolve(__dirname, "../.env");
 
-if (!fs.existsSync(envPath)) {
-    console.log(`\n[BOOTCHECK] - FAILED: File not found; ${envPath}\n`);
-    process.exit(1);
-}
+// if (!fs.existsSync(envPath)) {
+//     console.log(`\n[BOOTCHECK] - FAILED: File not found; ${envPath}\n`);
+//     process.exit(1);
+// }
 
 const envResult = dotenv.config({ path: envPath });
 
