@@ -2,6 +2,8 @@ process.noDeprecation = true;
 
 require("dotenv").config();
 
+const jwt = require('jsonwebtoken');
+
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
@@ -227,6 +229,42 @@ app.delete('/api/users/:email', authMiddleware, securityMiddleware, async (req, 
     }
 });
 
+app.post('/api/login', securityMiddleware, async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const users = DM.peek(['Users']);
+        const userEntry = Object.entries(users).find(([_, user]) => user.email === email);
+
+        if (!userEntry) {
+            return res.status(400).json({ error: 'UERROR: Invalid credentials' });
+        }
+
+        const [userId, user] = userEntry;
+
+        const passwordValid = await Utilities.comparePassword(password, user.passwordHash);
+        if (!passwordValid) {
+            return res.status(400).json({ error: 'UERROR: Invalid credentials' });
+        }
+
+        const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        res.json({
+            token,
+            user: {
+                id: userId,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                points: user.points
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'ERROR: Login failed' });
+    }
+});
+
 app.post('/api/register', async (req, res) => {
     const { email, password, username } = req.body;
 
@@ -262,6 +300,15 @@ app.post('/api/register', async (req, res) => {
                 error: 'UERROR: Username already taken.'
             });
         }
+
+        const existingUserWithEmail = Object.values(users).find(
+            (user) => user.email && user.email.toLowerCase() === email.toLowerCase()
+        );
+        if (existingUserWithEmail) {
+            return res.status(400).json({
+                error: 'UERROR: Email already taken.'
+            });
+        }
     }
 
     let existingUser = null;
@@ -279,15 +326,14 @@ app.post('/api/register', async (req, res) => {
     }
 
     try {
-        const userRecord = await admin.auth().createUser({
-            email,
-            password,
-            displayName: username
-        });
+        const userId = Utilities.generateUniqueID();
+        const hashedPassword = await Utilities.hashPassword(password);
 
-        DM['Users'][userRecord.uid] = {
-            username,
+        DM['Users'][userId] = {
+            id: userId,
             email,
+            username,
+            passwordHash: hashedPassword,
             role: "User",
             points: 0,
             redemptions: [],
@@ -296,9 +342,12 @@ app.post('/api/register', async (req, res) => {
 
         await DM.save();
 
+        const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
         res.status(200).json({
-            message: "SUCCESS: Registration successful.",
-            result: userRecord.uid
+            message: "SUCCESS: Registration successful",
+            token,
+            user: DM['Users'][userId]
         });
 
     } catch (error) {
