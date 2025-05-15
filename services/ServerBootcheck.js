@@ -58,7 +58,8 @@ const requiredEnvVars = [
     'API_KEY',
     'FIREBASE_DATABASE_URL',
     'SUPABASE_URL',
-    'SUPABASE_ANON_KEY'
+    'SUPABASE_ANON_KEY',
+    'JWT_SECRET'
 ];
 
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);

@@ -91,7 +91,7 @@ app.get("/", (req, res) => {
 
 app.get('/api/user', authMiddleware, securityMiddleware, async (req, res) => {
     try {
-        const userData = DM.peek(['Users', req.user.uid]);
+        const userData = DM.peek(['Users', req.user.userId]);
 
         if (!userData) return res.status(404).json({ error: 'UERROR: User not found' });
 
@@ -105,7 +105,7 @@ app.get('/api/user', authMiddleware, securityMiddleware, async (req, res) => {
 app.post('/api/redeem', authMiddleware, securityMiddleware, async (req, res) => {
     try {
         const { items } = req.body;
-        const user = DM.peek(['Users', req.user.uid]);
+        const user = DM.peek(['Users', req.user.userId]);
 
         if (!user) {
             return res.status(404).json({ error: 'UERROR: User not found. Please try logging in again.' });
@@ -154,7 +154,7 @@ app.post('/api/redeem', authMiddleware, securityMiddleware, async (req, res) => 
             }
         }
 
-        DM['Users'][req.user.uid] = user;
+        DM['Users'][req.user.userId] = user;
 
         for (const item of validatedItems) {
             const product = DM.peek(['Barcodes', item.productId]);
@@ -178,7 +178,7 @@ app.post('/api/redeem', authMiddleware, securityMiddleware, async (req, res) => 
 app.get('/api/users', authMiddleware, securityMiddleware, async (req, res) => {
     try {
         // Verify admin privileges
-        const requestingUser = DM.peek(['Users', req.user.uid]);
+        const requestingUser = DM.peek(['Users', req.user.userId]);
         if (!requestingUser || requestingUser.role !== 'Admin') {
             return res.status(403).json({ error: 'UERROR: Unauthorized access.' });
         }
@@ -198,7 +198,7 @@ app.get('/api/users', authMiddleware, securityMiddleware, async (req, res) => {
 
 app.delete('/api/users/:email', authMiddleware, securityMiddleware, async (req, res) => {
     try {
-        const requestingUser = DM.peek(['Users', req.user.uid]);
+        const requestingUser = DM.peek(['Users', req.user.userId]);
         if (!requestingUser || requestingUser.role !== 'Admin') {
             return res.status(403).json({ error: 'UERROR: Unauthorized access.' });
         }
